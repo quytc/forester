@@ -389,9 +389,21 @@ protected:
 	 */
 	void printBoxes() const
 	{
+		std::map<std::string, const Box*> boxes;
+
+		// reorder according to the name
 		for (auto& box : this->boxMan.getBoxes())
 		{
-			CL_DEBUG_AT(1, *(AbstractBox*)&box << ':' << std::endl << box);
+			std::stringstream ss;
+
+			ss << *(const AbstractBox*)(&box);
+
+			boxes.insert(std::make_pair(ss.str(), &box));
+		}
+
+		for (auto& nameBoxPair : boxes)
+		{
+			CL_DEBUG_AT(1, nameBoxPair.first << ':' << std::endl << *nameBoxPair.second);
 		}
 	}
 
@@ -444,6 +456,11 @@ protected:
 		catch (ProgramError& e)
 		{
 //			Engine::printTrace(state);
+			if (state.second->instr->insn()) {
+				CL_NOTE_MSG(&state.second->instr->insn()->loc,
+					SSD_INLINE_COLOR(C_LIGHT_RED, *state.second->instr->insn()));
+				CL_DEBUG_AT(2, std::endl << *state.second->fae);
+			}
 			throw;
 		}
 		catch (RestartRequest& e)
@@ -589,13 +606,19 @@ public:
 					continue;
 				}
 
-				CL_DEBUG_AT(1, "fixpoint at " << instr->insn()->loc << std::endl
-					<< ((FixpointInstruction*)instr)->getFixPoint());
+				if (instr->insn()) {
+					CL_DEBUG_AT(1, "fixpoint at " << instr->insn()->loc << std::endl
+						<< ((FixpointInstruction*)instr)->getFixPoint());
+				} else {
+					CL_DEBUG_AT(1, "fixpoint at unknown location" << std::endl
+						<< ((FixpointInstruction*)instr)->getFixPoint());
+				}
 			}
 
 			// print out stats
 			CL_DEBUG_AT(1, "forester has evaluated " << this->execMan.statesEvaluated()
-				<< " state(s) in " << this->execMan.tracesEvaluated() << " trace(s)");
+				<< " state(s) in " << this->execMan.tracesEvaluated() << " trace(s) using "
+				<< this->boxMan.getBoxes().size() << " box(es)");
 
 		}
 		catch (std::exception& e)
@@ -608,10 +631,30 @@ public:
 		}
 	}
 
+	void run(const Compiler::Assembly& assembly)
+	{
+		this->assembly_ = assembly;
+
+		try {
+
+			this->run();
+			this->assembly_.code_.clear();
+
+		} catch (...) {
+
+			this->assembly_.code_.clear();
+
+			throw;
+
+		}
+
+	}
+
 	void setDbgFlag()
 	{
 		this->dbgFlag = 1;
 	}
+
 };
 
 SymExec::SymExec() :
@@ -655,6 +698,14 @@ void SymExec::run()
 	assert(engine != nullptr);
 
 	this->engine->run();
+}
+
+void SymExec::run(const Compiler::Assembly& assembly)
+{
+	// Assertions
+	assert(engine != nullptr);
+
+	this->engine->run(assembly);
 }
 
 void SymExec::setDbgFlag()

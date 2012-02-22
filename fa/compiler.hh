@@ -24,6 +24,11 @@
 #include <vector>
 #include <unordered_map>
 
+#include <cl/storage.hh>
+#include <cl/cl_msg.hh>
+#include <cl/cldebug.hh>
+#include <cl/clutil.hh>
+
 #include "abstractinstruction.hh"
 #include "treeaut.hh"
 #include "label.hh"
@@ -33,6 +38,8 @@ namespace CodeStorage {
     struct Storage;
     struct Insn;
 }
+
+std::ostream& operator<<(std::ostream& os, const cl_loc& loc);
 
 class Compiler {
 
@@ -71,6 +78,8 @@ public:
 
 			size_t c = 0;
 
+			const CodeStorage::Insn* lastInsn = nullptr;
+
 			for (auto instr : as.code_) {
 
 				if ((instr->getType() == fi_type_e::fiJump) && prev) {
@@ -86,8 +95,13 @@ public:
 
 				prev = instr;
 
-				if (instr->insn())
+				if (instr->insn() && (instr->insn() != lastInsn)) {
+
 					os << instr->insn()->loc << ' ' << *instr->insn() << std::endl;
+
+					lastInsn = instr->insn();
+
+				}
 
 				if (instr->isTarget())
 					os << instr << ':' << std::endl;

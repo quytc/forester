@@ -28,6 +28,7 @@
 
 #include <unordered_map>
 
+#include "tatimint.hh"
 #include "types.hh"
 //#include "forestaut.hh"
 #include "treeaut.hh"
@@ -444,7 +445,7 @@ public:
 public:
 
 	virtual void toStream(std::ostream& os) const {
-		os << this->name;
+		os << this->name << '(' << this->arity << ')';
 	}
 
 	friend size_t hash_value(const Box& box) {
