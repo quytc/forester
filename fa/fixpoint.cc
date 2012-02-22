@@ -93,7 +93,7 @@ struct FuseNonZeroF {
 };
 
 inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan) {
-
+//        CL_DEBUG_AT(1, "before normalization: " << std::endl << fae);
 	std::set<size_t> tmp;
 
 	VirtualMachine vm(fae);
@@ -134,12 +134,12 @@ inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan) {
 	std::unordered_map<Box, std::set<size_t>, boost::hash<Box>> cache;
 
 	std::vector<std::shared_ptr<const Box>> boxes;
-
+//        CL_DEBUG_AT(1, "each comp: " << std::endl << *fae.roots[0]);
 	// never fold at root 0
 	for (size_t i = 1; i < order.size(); ++i) {
 
 		assert(fae.roots[order[i]]);
-
+          //      CL_DEBUG_AT(1, "folding at each comp: " << std::endl << *fae.roots[i]);
 		if (folding.discover(order[i], tmp, &boxes)) {
 
 			matched = true;
@@ -147,9 +147,9 @@ inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan) {
 			continue;
 
 		}
-
+//                std::cerr << "before going to boxes" << std::endl;
 		for (auto& aBox : boxes) {
-
+  //                     std::cerr << "inside the for loop of boxes: ";// << *boxMan.getBox(*aBox) << std::endl;
 			auto iter = cache.insert(std::make_pair(*aBox, std::set<size_t>())).first;
 
 			iter->second.insert(order[i]);
@@ -158,7 +158,7 @@ inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan) {
 
 				auto newBox = boxMan.getBox(*aBox);
 
-				CL_CDEBUG(3, "learned " << *(AbstractBox*)newBox << ":" << std::endl << *newBox);
+				CL_DEBUG_AT(1, "learned " << *(AbstractBox*)newBox << ":" << std::endl << *newBox);
 
 				for (auto& j : iter->second)
 					folding.discover(j, tmp);
@@ -175,14 +175,14 @@ inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan) {
 
 	}
 
-	CL_CDEBUG(3, "after folding: " << std::endl << fae);
-
+//	CL_DEBUG_AT(1, "after folding: " << std::endl << fae);
+        
 	vm.getNearbyReferences(abp.d_ref.root, tmp);
 
 	norm.scan(marked, order, tmp);
 	norm.normalize(marked, order);
 
-	CL_CDEBUG(3, "after normalization: " << std::endl << fae);
+//	CL_DEBUG_AT(1, "after normalization: " << std::endl << fae);
 
 	return matched;
 
@@ -195,8 +195,8 @@ inline bool testInclusion(FAE& fae, TA<label_type>& fwdConf, UFAE& fwdConfWrappe
 
 	fwdConfWrapper.fae2ta(ta, index, fae);
 
-//	CL_CDEBUG("challenge" << std::endl << ta);
-//	CL_CDEBUG("response" << std::endl << this->fwdConf);
+//	CL_DEBUG_AT(1,"challenge" << std::endl << ta);
+//	CL_DEBUG_AT(1,"response" << std::endl << fwdConf);
 
 	if (TA<label_type>::subseteq(ta, fwdConf))
 		return true;
@@ -215,7 +215,7 @@ inline bool testInclusion(FAE& fae, TA<label_type>& fwdConf, UFAE& fwdConfWrappe
 }
 
 inline void abstract(FAE& fae, TA<label_type>& fwdConf, TA<label_type>::Backend& backend, BoxMan& boxMan) {
-
+//        CL_DEBUG_AT(1, "before abstraction: " << std::endl <<fae);
 	fae.unreachableFree();
 
 //	CL_CDEBUG(1, SSD_INLINE_COLOR(C_LIGHT_GREEN, "after normalization:" ) << std::endl << *fae);
@@ -244,11 +244,12 @@ inline void abstract(FAE& fae, TA<label_type>& fwdConf, TA<label_type>::Backend&
 	Abstraction abstraction(fae);
 
 	for (size_t i = 1; i < fae.getRootCount(); ++i)
+               {// CL_DEBUG_AT(1, "abstraction root count: " <<i << std::endl);
 		abstraction.heightAbstraction(i, 1, SmartTMatchF());
-
+               }  
 	fae.unreachableFree();
 
-	CL_CDEBUG(3, "after abstraction: " << std::endl << fae);
+//	CL_DEBUG_AT(1, "after abstraction: " << std::endl << fae);
 
 }
 
@@ -256,7 +257,7 @@ inline void abstract(FAE& fae, TA<label_type>& fwdConf, TA<label_type>::Backend&
 void FI_abs::execute(ExecutionManager& execMan, const AbstractInstruction::StateType& state) {
 
 	std::shared_ptr<FAE> fae = std::shared_ptr<FAE>(new FAE(*state.second->fae));
-
+//      CL_DEBUG_AT(1, "before execution: " << std::endl << *fae);
 	normalizeAndFold(*fae, this->boxMan);
 
 	do {
@@ -279,12 +280,15 @@ void FI_abs::execute(ExecutionManager& execMan, const AbstractInstruction::State
 		execMan.enqueue(state.second, state.first, fae, this->next_);
 
 	}
+   //CL_DEBUG_AT(1, "after execution: " << std::endl << *fae);
+
 
 }
 
 // FI_fix
 void FI_fix::execute(ExecutionManager& execMan, const AbstractInstruction::StateType& state) {
-
+        
+       // CL_DEBUG_AT(1, "fix statement ");
 	std::shared_ptr<FAE> fae = std::shared_ptr<FAE>(new FAE(*state.second->fae));
 
 	normalizeAndFold(*fae, this->boxMan);

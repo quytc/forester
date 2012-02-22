@@ -32,26 +32,27 @@ public:
 	void heightAbstraction(size_t root, size_t height, F f) {
 		assert(root < this->fae.roots.size());
 		assert(this->fae.roots[root]);
-//		std::cerr << "abstracting " << std::endl << *this->roots[root];
+//		std::cerr << "abstracting " << std::endl << *this->fae.roots[root];
 		Index<size_t> stateIndex;
 		this->fae.roots[root]->buildStateIndex(stateIndex);
-//		std::cerr << stateIndex << std::endl;
+//		std::cerr << "stateIndex:" << stateIndex << std::endl;
 		std::vector<std::vector<bool> > rel(stateIndex.size(), std::vector<bool>(stateIndex.size(), true));
 		this->fae.roots[root]->heightAbstraction(rel, height, f, stateIndex);
-//		utils::relPrint(std::cerr, rel);
+		utils::relPrint(std::cerr, rel);
 		ConnectionGraph::StateToCutpointSignatureMap stateMap;
 		ConnectionGraph::computeSignatures(stateMap, *this->fae.roots[root]);
+    //          std::cerr << "stateMap" << stateMap[1] << std::endl;
 		for (Index<size_t>::iterator j = stateIndex.begin(); j != stateIndex.end(); ++j) {
 			for (Index<size_t>::iterator k = stateIndex.begin(); k != stateIndex.end(); ++k) {
 				if (k == j)
 					continue;
 				if (stateMap[j->first] != stateMap[k->first]) {
-//					std::cerr << j->first << " != " << k->first << " because " << stateMap[j->first] << " !=  " << stateMap[k->first] << std::endl;
+//			std::cerr << j->first << " != " << k->first << " because " << stateMap[j->first] << " !=  " << stateMap[k->first] << std::endl;
 					rel[j->second][k->second] = false;
 				}
 			}
 		}
-//		utils::relPrint(std::cerr, rel);
+		utils::relPrint(std::cerr, rel);
 		TA<label_type> ta(*this->fae.backend);
 		this->fae.roots[root]->collapsed(ta, rel, stateIndex);
 		this->fae.roots[root] = std::shared_ptr<TA<label_type>>(this->fae.allocTA());

@@ -20,12 +20,12 @@ int main() {
 
 	struct T* x = head;
 
-	while (__nondet()) {
+//	while (__nondet()) {
 		x->next = malloc(sizeof(struct T));
 		x->next->next = NULL;
 		x->next->head = head;
 		x = x->next;
-	}
+//	}
 
 	x = head;
 

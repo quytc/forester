@@ -635,7 +635,8 @@ public:
 
 		std::vector<size_t> aux;
 
-		CL_CDEBUG(3, "folding: " << this->fae);
+//                std::cerr << "folding:     " << this->fae;
+	//	CL_CDEBUG(3, "folding: " << this->fae);
 
 		this->fae.updateConnectionGraph();
 
@@ -645,15 +646,15 @@ public:
 		this->fae.pushStateOffset();
 
 		for (auto& cutpoint : this->fae.connectionGraph.data[root].signature) {
-
+//                    std::cerr << "Cutpoint: " << cutpoint << std::endl;
 			if (cutpoint.root == root) {
-
-				CL_CDEBUG(3, "type 1 cutpoint detected at root " << root);
+  //                              std::cerr << "type 1 cutpoint detected at root" << root << std::endl;
+			//	CL_CDEBUG(3, "type 1 cutpoint detected at root " << root);
 
 				if (this->makeType1Box(box, root, root, forbidden))
 					return true;
-
-				CL_CDEBUG(3, "bailing out ...");
+                    
+		        //	CL_CDEBUG(3, "bailing out ...");
 
 				if (box && boxes) {
 
@@ -670,7 +671,7 @@ public:
 			}
 
 			if (cutpoint.joint) {
-
+                                std::cerr << "type 2 cutpoint detected at root"  << root;
 				CL_CDEBUG(3, "type 2 cutpoint detected at root " << root);
 
 				if (this->makeType1Box(box, root, cutpoint.root, forbidden))

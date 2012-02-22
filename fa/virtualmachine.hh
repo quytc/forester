@@ -22,7 +22,7 @@
 
 #include <vector>
 #include <cassert>
-
+#include <sstream> 
 #include "types.hh"
 #include "forestautext.hh"
 #include "programerror.hh"
@@ -468,7 +468,9 @@ public:
 		for (auto i = nodeInfo.begin(); i != nodeInfo.end(); ++i)
 		{	// push selector
 			label.push_back(this->fae.boxMan->getSelector(*i));
-		}
+	                std:: stringstream ss;
+                         ss << "get nodeinfor";//this->fae.boxMan->getSelector(*i);       
+        	}
 
 		// build the tuple
 		vector<size_t> lhs(nodeInfo.size(),
@@ -614,11 +616,15 @@ public:
 		TA<label_type> ta(*this->fae.backend);
 		this->transitionModify(ta, this->fae.roots[root]->getAcceptingTransition(),
 			offset, in, out);
-		this->fae.roots[root]->copyTransitions(ta);
+//	        std::cerr << "----TA-------------------------------------------------------" << ta << "--------------" << std::endl;
+         	this->fae.roots[root]->copyTransitions(ta);
+//              std::cerr << "----TA-------------------------------------------------------" << ta << "--------------" << std::endl;         
 		TA<label_type>* tmp = this->fae.allocTA();
 		ta.unreachableFree(*tmp);
-		this->fae.roots[root] = std::shared_ptr<TA<label_type>>(tmp);
+//		std::cerr << "----TA-------------------------------------------------------" << *tmp << "---------------" << std::endl;
+                this->fae.roots[root] = std::shared_ptr<TA<label_type>>(tmp);
 		this->fae.connectionGraph.invalidate(root);
+//                std::cerr << "----TA-------------------------------------------------------" << *fae.roots[root] << "-------------------" << std::endl;
 	}
 
 	/// @todo add documentation

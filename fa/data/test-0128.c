@@ -6,52 +6,25 @@
 
 #include <stdlib.h>
 
-int __nondet();
+//  int __nondet();
 
-struct node_top {
-    struct node_top *next;
-    struct node_low *data;
-};
-
-struct node_low {
-    struct node_low *next;
-};
-
-int main()
-{
-    struct node_top *top = malloc(sizeof *top);
-    struct node_top *now = top;
-    top->next = NULL;
-    top->data = NULL;
-    if (__nondet()) {
-        struct node_low *ptr = malloc(sizeof *ptr);
-        ptr->next = NULL;
-        top->data = ptr;
-    }
-
-    while (__nondet()) {
-        struct node_top *pi = malloc(sizeof *pi);
-        pi->next = NULL;
-        pi->data = NULL;
-
-      if (__nondet()) {
-        struct node_low *ptr = malloc(sizeof *ptr);
-        ptr->next = NULL;
-        pi->data = ptr;
-      }
-	
-      now->next = pi;
-      now = now->next;
-    }
-
-    while (top) {
-      now = top;
-      top = top->next;
-      if (now->data) {
-        free(now->data);
-      }
-      free(now);
-    }
-
+  struct node{
+    struct node *next;
+    struct node *next1;
+    struct node *next2;
+  //  int data;
+  };
+ int main()
+ {
+    struct node* x= malloc(sizeof (struct node));
+    struct node* y = malloc(sizeof (struct node));
+    struct node* z = malloc(sizeof (struct node));
+    x->next = y;
+    x->next1 = y;
+    x->next2 = y;
+    y->next = z;
+    free(x);
+    free(z);
+    free(y);
     return 0;
-}
+ }

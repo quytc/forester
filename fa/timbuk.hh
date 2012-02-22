@@ -485,30 +485,33 @@ public:
 	}
 
 	void writeTransition(const std::vector<size_t>& lhs, size_t label, size_t rhs) {
+//              this->out << "write transition 1";
 		this->out << 'l' << label;
 		if (lhs.size() > 0) {
 			this->out << "(s" << lhs[0];
 			for (size_t i = 1; i < lhs.size(); ++i)
-				this->out << ",q" << lhs[i];
+				this->out << ",quy" << lhs[i];
 			this->out << ')';
 		}
-		this->out << "->q" << rhs;
+		this->out << "->quy" << rhs;
 	}
 
 	void writeTransition(const std::vector<size_t>& lhs, const std::string& label, size_t rhs) {
-		this->out << label;
+//		this->out << "write transition 2";
+                this->out << label;
 		if (lhs.size() > 0) {
-			this->out << "(q" << lhs[0];
+			this->out << "(quy" << lhs[0];
 			for (size_t i = 1; i < lhs.size(); ++i)
-				this->out << ",q" << lhs[i];
+				this->out << ",quy" << lhs[i];
 			this->out << ')';
 		}
-		this->out << "->q" << rhs;
+		this->out << "->quy" << rhs;
 	}
 
 	template <class F>
 	void writeTransition(const std::vector<size_t>& lhs, const std::string& label, size_t rhs, F f) {
-		this->out << label;
+  //            this->out << "write transition 3";	
+	this->out << label;
 		if (lhs.size() > 0) {
 			this->out << '(' << f(lhs[0]);
 			for (size_t i = 1; i < lhs.size(); ++i)
@@ -519,7 +522,8 @@ public:
 	}
 
 	void writeTransition(const std::vector<string>& lhs, const std::string& label, const std::string& rhs) {
-		this->out << label;
+	       this->out << "write transition 4";	
+               this->out << label;
 		if (lhs.size() > 0) {
 			this->out << '(' << lhs[0];
 			for (size_t i = 1; i < lhs.size(); ++i)

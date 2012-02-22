@@ -155,12 +155,17 @@ public:
 		for (typename TA<T>::iterator i = aut.begin(); i != aut.end(); ++i) {
 			std::ostringstream ss;
 			ss << i->label();
+//                      std::cerr << i->label();
 			this->writeTransition(i->lhs(), ss.str(), i->rhs(), f);
 			this->endl();
+//        std::cerr << "-------------tree automata-------------------" << i->lhs() << std::endl;                
 		}
+       //  std::cerr << "-------------tree automata-------------------" << *aut;
+
 	}
 
 	void writeTransitions(const TA<T>& aut) {
+  //              std::cerr << "-------------tree automata-------------------" << aut;
 		for (typename TA<T>::iterator i = aut.begin(); i != aut.end(); ++i) {
 			std::ostringstream ss;
 			ss << i->label();
@@ -171,6 +176,7 @@ public:
 
 	template <class F>
 	void writeOne(const TA<T>& aut, F f, const string& name = "TreeAutomaton") {
+    //            std::cerr << "-------------tree automata-------------------" << aut;
 		std::map<string, size_t> labels;
 		std::set<size_t> states;
 		for (typename TA<T>::iterator i = aut.begin(); i != aut.end(); ++i) {

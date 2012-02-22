@@ -356,10 +356,10 @@ protected:
 
 			if (s->instr->insn()) {
 				CL_NOTE_MSG(&s->instr->insn()->loc, SSD_INLINE_COLOR(C_LIGHT_RED, *s->instr->insn()));
-				CL_DEBUG_AT(2, std::endl << *s->fae);
+				CL_DEBUG_AT(1, std::endl << *s->fae);
 			}
 
-			CL_DEBUG_AT(2, *s->instr);
+//			CL_DEBUG_AT(2, *s->instr);
 
 		}
 
@@ -368,7 +368,7 @@ protected:
 	void printBoxes() const {
 
 		for (auto& box : this->boxMan.getBoxes())
-			CL_DEBUG_AT(1, *(AbstractBox*)&box << ':' << std::endl << box);
+			CL_DEBUG_AT(1, "Available Boxes: "<< *(AbstractBox*)&box << ':' << std::endl << box);
 
 	}
 
@@ -391,10 +391,13 @@ protected:
 
 				}
 
+//    Engine::printTrace(state);
 				this->execMan.execute(state);
-
+//                              CL_DEBUG_AT(1, "first part of state:" << *state.second->fae);
+                              //  Engine::printTrace(state);
 			}
 
+                  
 		} catch (ProgramError& e) {
 
 //			Engine::printTrace(state);
@@ -525,7 +528,7 @@ public:
 
 			}
 
-			CL_DEBUG_AT(1, "forester has evaluated " << this->execMan.statesEvaluated() << " state(s) in " << this->execMan.tracesEvaluated() << " trace(s)");
+		CL_DEBUG_AT(1, "forester has evaluated " << this->execMan.statesEvaluated() << " state(s) in " << this->execMan.tracesEvaluated() << " trace(s)");
 
 		} catch (std::exception& e) {
 

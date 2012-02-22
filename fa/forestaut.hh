@@ -55,7 +55,7 @@ public:
 			if (!fa.roots[i])
 				continue;
 
-			os << "===" << std::endl << "root " << i << " [" << fa.connectionGraph.data[i] << ']';
+			os << "===" << std::endl << "root " << i << ']'; //<< " [" << fa.connectionGraph.data[i] << ']';
 
 			TAWriter<label_type> writer(os);
 
@@ -64,7 +64,7 @@ public:
 
 			writer.endl();
 			writer.writeTransitions(*fa.roots[i], FA::WriteStateF());
-
+                  //    std::cerr << "------------------Tree automata:----------------"  << std::endl;
 		}
 
 		return os;
