@@ -336,6 +336,7 @@ public:
 		this->fae.variables.pop_back();
 	}
 
+     
 	/**
 	 * @brief  Appends a number of new variables
 	 *

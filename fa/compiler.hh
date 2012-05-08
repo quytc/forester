@@ -27,7 +27,25 @@
 #include "abstractinstruction.hh"
 #include "treeaut.hh"
 #include "label.hh"
+#include "sstream"
+#include <sstream>
+#include <cstdlib>
 
+#include <list>
+#include <unordered_set>
+
+#include <cl/cldebug.hh>
+
+#include "programerror.hh"
+#include "symctx.hh"
+#include "nodebuilder.hh"
+#include "call.hh"
+#include "jump.hh"
+#include "comparison.hh"
+#include "fixpoint.hh"
+#include "microcode.hh"
+#include "regdef.hh"
+#include "string"
 namespace CodeStorage {
     struct Fnc;
     struct Storage;
@@ -38,7 +56,9 @@ class Compiler {
 
 public:
 
+//        std::vector<string> vars;
 	struct Assembly {
+
 
 		std::vector<AbstractInstruction*> code_;
 		std::unordered_map<const struct CodeStorage::Fnc*, AbstractInstruction*> functionIndex_;
@@ -106,13 +126,14 @@ public:
 
 public:
 
+       // std::vector<string> vars;
 	Compiler(TA<label_type>::Backend& fixpointBackend, TA<label_type>::Backend& taBackend,
 		class BoxMan& boxMan, const std::vector<const class Box*>& boxes);
 
 	~Compiler();
 
-	void compile(Assembly& assembly, const CodeStorage::Storage &stor, const CodeStorage::Fnc& entry);
-
+	void compile(Assembly& assembly, const CodeStorage::Storage &stor, const CodeStorage::Fnc& entry, std::vector<string>& vars);
+        //void getVars(std::vector<string>& out);
 private:
 
 	class Core;

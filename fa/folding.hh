@@ -671,7 +671,7 @@ public:
 			}
 
 			if (cutpoint.joint) {
-                                std::cerr << "type 2 cutpoint detected at root"  << root;
+                           //     std::cerr << "type 2 cutpoint detected at root"  << root;
 				CL_CDEBUG(3, "type 2 cutpoint detected at root " << root);
 
 				if (this->makeType1Box(box, root, cutpoint.root, forbidden))

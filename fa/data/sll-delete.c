@@ -14,17 +14,17 @@ int main() {
 
 	struct T* x = NULL;
 	struct T* y = NULL;
-
+        int t = 1;
 	while (__nondet()) {
 		y = malloc(sizeof(*y));
 		y->next = x;
-		x = y;
+		x = y; 
 	}
 
 	struct T* z = NULL;
 
-	while (x != NULL) {
-		if (__nondet()) {
+//	while (x != NULL) {
+/*		if (__nondet()) {
 			if (z)
 				z->next = x->next;
 			else
@@ -32,9 +32,10 @@ int main() {
 			free(x);
 			break;
 		}
-		z = x;
-		x = x->next;
-	}
+*/
+//		z = x;
+//		x = x->next;
+//	}
 
 	while (y != NULL) {
 		x = y;

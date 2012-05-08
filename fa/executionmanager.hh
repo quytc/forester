@@ -33,7 +33,7 @@ class ExecutionManager {
 	SymState* root_;
 
 	SymState::QueueType queue_;
-
+       // vector<int> checkqueue_;
 	size_t statesExecuted_;
 	size_t tracesEvaluated_;
 
@@ -74,7 +74,12 @@ public:
 	};
 */
 public:
-
+        vector<string> checkqueue_ ;
+        string condStatus;
+        std::vector<FAE> absFAEs;
+        std::vector<string> avaiBoxes;
+        std::vector<pair<SymState*,string>> condQueue_;
+        std::vector<pair<SymState*,std::vector<FAE>>> absQueue_;
 	ExecutionManager() : root_(NULL) {}
 
 	~ExecutionManager() { this->clear(); }
@@ -99,6 +104,14 @@ public:
 		this->tracesEvaluated_ = 0;
 
 	}
+        void encheckqueue(string status){
+             this->checkqueue_.push_back(status);
+            // std::cerr << "size of the queue " << this->checkqueue_.size() << std::endl;
+        }
+        void encondQueue(SymState* state ,string status){
+             this->condQueue_.push_back(pair<SymState*,string>(state,status));
+            // std::cerr << "size of the queue " << this->checkqueue_.size() << std::endl;
+        }
 
 	SymState* enqueue(SymState* parent, const std::shared_ptr<std::vector<Data>>& registers,
 		const std::shared_ptr<const FAE>& fae, AbstractInstruction* instr) {

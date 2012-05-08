@@ -1,30 +1,37 @@
-/*
- * Linux driver snippet
- *
- * boxes:
- */
-
 #include <stdlib.h>
 
-//  int __nondet();
+int main() {
 
-  struct node{
-    struct node *next;
-    struct node *next1;
-    struct node *next2;
-  //  int data;
-  };
- int main()
- {
-    struct node* x= malloc(sizeof (struct node));
-    struct node* y = malloc(sizeof (struct node));
-    struct node* z = malloc(sizeof (struct node));
-    x->next = y;
-    x->next1 = y;
-    x->next2 = y;
-    y->next = z;
-    free(x);
-    free(z);
-    free(y);
-    return 0;
- }
+        struct T {
+                struct T* next;
+                struct T* prev;
+        };
+
+        struct T* x = NULL;
+        struct T* y = NULL;
+        struct T* z = NULL;
+        struct T* k = NULL;
+//      while (__nondet()) {
+                y = malloc(sizeof(*y));
+                y->next = x;
+                x = y;
+
+                y = malloc(sizeof(*y));
+                y->next = x;
+                x = y;
+//      }
+
+                z = malloc(sizeof(*x));
+                x->prev = z;
+                z = y;
+/*        while (y != NULL) {
+                x = y;
+                y = y->next;
+                z = y;
+                free(x);
+        }
+*/
+        return 0;
+
+}
+

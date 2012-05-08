@@ -169,15 +169,7 @@ public:
 
 			if (marked[cutpoint.root])
 				continue;
-/*
-			if (!this->fae.connectionGraph.isMergable(root, cutpoint.root)) {
 
-				marked[cutpoint.root] = true;
-
-				continue;
-
-			}
-*/
 			std::vector<size_t> refStates;
 
 			TA<label_type>* ta = this->mergeRoot(
@@ -221,7 +213,7 @@ public:
 	// normalize representation
 	void normalize(std::vector<bool>& marked, const std::vector<size_t>& order) {
 
-		size_t i;
+            size_t i;
 
 		for (i = 0; i < order.size(); ++i) {
 
@@ -280,8 +272,7 @@ public:
 			i->d_ref.root = index[i->d_ref.root];
 
 		}
-
-	}
+ }
 
 public:
 

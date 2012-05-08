@@ -505,38 +505,20 @@ public:
 			return ss.str();
 
 		};
-
-		os << "===" << std::endl << "output (";
-
-		for(auto& s : box.outputCoverage())
-			os << " +" << s;
-
-		os << " ) [" << box.outputSignature << "] ";
-
-		TAWriter<label_type> writer(os);
-
+                os << "===" << std::endl << "output ";
+         	TAWriter<label_type> writer(os);
 		for (auto state : box.output->getFinalStates())
 			writer.writeState(state);
-
 		writer.endl();
 		writer.writeTransitions(*box.output, writeStateF);
-
 		if (!box.input)
 			return os;
-
-		os << "===" << std::endl << "input " << box.inputIndex << " (";
-
-		for(auto& s : box.inputCoverage(box.inputIndex))
-			os << " +" << s;
-
-		os << " ) [" << box.inputSignature << "] ";
-
+                
+                os << "===" << std::endl << "input ";
 		for (auto state : box.input->getFinalStates())
 			writer.writeState(state);
-
 		writer.endl();
 		writer.writeTransitions(*box.input, writeStateF);
-
 		return os;
 
 	}

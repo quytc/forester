@@ -497,7 +497,6 @@ public:
 	}
 
 	void writeTransition(const std::vector<size_t>& lhs, const std::string& label, size_t rhs) {
-//		this->out << "write transition 2";
                 this->out << label;
 		if (lhs.size() > 0) {
 			this->out << "(quy" << lhs[0];
@@ -510,15 +509,17 @@ public:
 
 	template <class F>
 	void writeTransition(const std::vector<size_t>& lhs, const std::string& label, size_t rhs, F f) {
-  //            this->out << "write transition 3";	
-	this->out << label;
-		if (lhs.size() > 0) {
-			this->out << '(' << f(lhs[0]);
-			for (size_t i = 1; i < lhs.size(); ++i)
-				this->out << ',' << f(lhs[i]);
-			this->out << ')';
-		}
-		this->out << "->" << f(rhs);
+              this->out << f(rhs) << " ---> ";
+              if(label.find("}") != string::npos)
+                this->out << "<" << label.substr(int(label.find("}"))+2);
+              else
+                this->out << label;
+                if (lhs.size() > 0) {
+                        this->out << '(' << f(lhs[0]);
+                        for (size_t i = 1; i < lhs.size(); ++i)
+                                this->out << ',' << f(lhs[i]);
+                        this->out << ')';
+                }
 	}
 
 	void writeTransition(const std::vector<string>& lhs, const std::string& label, const std::string& rhs) {

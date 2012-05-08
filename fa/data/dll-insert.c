@@ -22,7 +22,7 @@ int main() {
     }
 
     y = x;
-
+/*
     while (y != NULL) {
 	if (__nondet()) {
 	    struct T* z = malloc(sizeof(struct T));
@@ -35,13 +35,12 @@ int main() {
 	}
 	y = y->next;
     }
-
+*/
     while (x != NULL) {
 	y = x;
         x = x->next;
 	free(y);
     }
-
     return 0;
 
 }

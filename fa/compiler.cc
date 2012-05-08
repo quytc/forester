@@ -34,7 +34,7 @@
 #include "fixpoint.hh"
 #include "microcode.hh"
 #include "regdef.hh"
-
+#include "string"
 #include "compiler.hh"
 
 struct OpWrapper {
@@ -151,8 +151,7 @@ class Compiler::Core {
 
 	BuiltinTable builtinTable;
 	LoopAnalyser loopAnalyser;
-
-protected:
+ protected:
 
 	std::pair<SymCtx, CodeStorage::Block>& getFncInfo(const CodeStorage::Fnc* fnc) {
 
@@ -232,13 +231,6 @@ protected:
 		}
 
 	}
-/*
-	void cLoadVar(size_t dst, size_t offset) {
-
-		this->append(new FI_load_ABP(dst, (int)offset));
-
-	}
-*/
 	void cMoveReg(size_t dst, size_t src, int offset) {
 
 		if (offset > 0) {
@@ -636,9 +628,10 @@ protected:
 
 	void compileAssignment(const CodeStorage::Insn& insn) {
 
+                // AbstractInstruction::StateType state;
+                
 		const cl_operand& dst = insn.operands[0];
 		const cl_operand& src = insn.operands[1];
-
 		assert(src.type->code == dst.type->code);
 
 		size_t dstReg = this->lookupStoreReg(dst, 0);
@@ -674,9 +667,10 @@ protected:
 
 		}
 
+                // CL_CDEBUG(4, state);
 		this->cStoreOperand(dst, srcReg, 1);
 		this->cKillDeadVariables(insn.varsToKill);
-
+                
 	}
 
 	void compileTruthNot(const CodeStorage::Insn& insn) {
@@ -710,8 +704,10 @@ protected:
 	}
 
 	void compileMalloc(const CodeStorage::Insn& insn) {
-
-		const cl_operand& dst = insn.operands[0];
+                std::stringstream out;
+                out << insn;
+                string str = out.str();
+          	const cl_operand& dst = insn.operands[0];
 		const cl_operand& src = insn.operands[2];
 
 		assert(src.type->code == cl_type_e::CL_TYPE_INT);
@@ -929,11 +925,13 @@ protected:
 
 	void compileCond(const CodeStorage::Insn& insn) {
 
+               
 		const cl_operand& src = insn.operands[0];
-
+                //std::cerr << insn << std::endl;              
 		size_t srcReg = this->cLoadOperand(0, src);
 
 		this->cKillDeadVariables(insn.varsToKill);
+
 
 		AbstractInstruction* tmp[2] = { NULL, NULL };
 
@@ -1008,7 +1006,7 @@ protected:
 
 	void compileInstruction(const CodeStorage::Insn& insn) {
 
-		CL_DEBUG_AT(3, insn.loc << ' ' << insn);
+	//	CL_DEBUG_AT(3, insn.loc << ' ' << insn);
 
 		switch (insn.code) {
 
@@ -1076,37 +1074,41 @@ protected:
 
 	}
 
-	void compileBlock(const CodeStorage::Block* block, bool abstract) {
-
+	void compileBlock(const CodeStorage::Block* block, bool abstract, std::vector<pair<string, string>>& instructions) {
+                std::stringstream blkout;
+                blkout << block->name();
+                string blk = blkout.str();
+           
 		size_t head = this->assembly->code_.size();
-
+                
 		if (abstract || this->loopAnalyser.isEntryPoint(*block->begin()))
 			this->cAbstraction();
-/*		else
-			this->cFixpoint();*/
 
 		for (auto insn : *block) {
-
+                        std::stringstream insout;
+                        insout << *insn;
+                        string str = insout.str();
+            
+                        instructions.push_back(pair<string,string>(blk,str));
 			this->compileInstruction(*insn);
 
 			if (head == this->assembly->code_.size())
 				continue;
 
 			this->assembly->code_[head]->insn(insn);
-/*
-			for (size_t i = head; i < this->assembly->code_.size(); ++i)
-				CL_CDEBUG(this->assembly->code_[i] << ":\t" << *this->assembly->code_[i]);
-*/
+
 			head = this->assembly->code_.size();
 
 		}
+           
 
 	}
 
 	void compileFunction(const CodeStorage::Fnc& fnc) {
-
+                std::vector<pair<string, string>> instructions = {};
+              
 		std::pair<SymCtx, CodeStorage::Block>& fncInfo = this->getFncInfo(&fnc);
-
+              
 		// get context
 		this->curCtx = &fncInfo.first;
 
@@ -1176,12 +1178,12 @@ protected:
 
 			size_t blockHead = this->assembly->code_.size();
 
-			this->compileBlock(block, first);
+			this->compileBlock(block, first, instructions);
 
 			assert(blockHead < this->assembly->code_.size());
 			p.first->second = this->assembly->code_[blockHead];
 
-			for (auto target : block->targets())
+		for (auto target : block->targets())
 				queue.push_back(target);
 
 			first = false;
@@ -1191,19 +1193,24 @@ protected:
 		auto iter = this->codeIndex.find(fnc.cfg.entry());
 		assert(iter != this->codeIndex.end());
 		this->assembly->functionIndex_.insert(std::make_pair(&fnc, iter->second));
-
-	}
+              
+      	}
 
 public:
 
-	Core(TA<label_type>::Backend& fixpointBackend, TA<label_type>::Backend& taBackend,
+       Core(TA<label_type>::Backend& fixpointBackend, TA<label_type>::Backend& taBackend,
 		BoxMan& boxMan, const std::vector<const Box*>& boxes)
 		: fixpointBackend(fixpointBackend), taBackend(taBackend), boxMan(boxMan), boxes(boxes) {}
 
-	void compile(Compiler::Assembly& assembly, const CodeStorage::Storage& stor, const CodeStorage::Fnc& entry) {
+       
+	void compile(Compiler::Assembly& assembly, const CodeStorage::Storage& stor, const CodeStorage::Fnc& entry, std::vector<string>& vars) {
 
-		this->reset(assembly);
-
+              this->reset(assembly);
+                for(auto var : stor.vars)
+                {
+               if(!var.name.empty()) 
+                 vars.push_back(var.name);
+               }
 		for (auto fnc : stor.fncs) {
 
 			if (isDefined(*fnc))
@@ -1270,6 +1277,6 @@ Compiler::~Compiler() {
 	delete this->core_;
 }
 
-void Compiler::compile(Compiler::Assembly& assembly, const CodeStorage::Storage& stor, const CodeStorage::Fnc& entry) {
-	this->core_->compile(assembly, stor, entry);
+void Compiler::compile(Compiler::Assembly& assembly, const CodeStorage::Storage& stor, const CodeStorage::Fnc& entry, std::vector<string>& vars) {
+	this->core_->compile(assembly, stor, entry, vars);
 }

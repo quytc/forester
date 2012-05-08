@@ -119,13 +119,19 @@ struct SelData {
 	 *
 	 * @returns  The modified output stream
 	 */
-	friend std::ostream& operator<<(std::ostream& os, const SelData& x) {
+/*	friend std::ostream& operator<<(std::ostream& os, const SelData& x) {
 		os << "sel" << x.offset << ':' << x.size << '[';
 		if (x.displ >= 0) {
 			os << '+';
 		}
 		return os << x.displ << ']';
 	}
+*/
+        friend std::ostream& operator<<(std::ostream& os, const SelData& x) {
+                os << "sel" << x.offset;
+                return os;
+        }
+
 };
 
 /**
@@ -663,8 +669,9 @@ struct Data {
 			case data_type_e::t_void_ptr:
 				os << "(void_ptr)" << x.d_void_ptr_size; break;
 			case data_type_e::t_ref:
-				os << "(ref)" << x.d_ref.root << '+' << x.d_ref.displ; break;
-			case data_type_e::t_int:
+		//		os << "(ref)" << x.d_ref.root << '+' << x.d_ref.displ; break;
+		         os << "(ref)" << x.d_ref.root; break;
+                	case data_type_e::t_int:
 				os << "(int)" << x.d_int; break;
 			case data_type_e::t_bool:
 				os << "(bool)" << x.d_bool; break;

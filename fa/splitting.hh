@@ -207,10 +207,6 @@ public:
 
 	// adds redundant root points to allow further manipulation
 	void isolateAtLeaf(std::vector<FAE*>& dst, size_t root, size_t target, size_t selector) const {
-
-//		CL_CDEBUG(3, std::endl << this->fae);
-//		CL_CDEBUG(3, "isolateAtLeaf: (" << root << ", " << selector << ':' << target << ')');
-
 		assert(root < this->fae.roots.size());
 		assert(this->fae.roots[root]);
 
@@ -292,32 +288,16 @@ public:
 		assert(this->fae.roots[root]);
 		size_t newState = this->fae.freshState();
 		TA<label_type> ta(*this->fae.roots[root], false);
-//                std::cerr << "Transations: " << t.label() << std::endl;  
-	//	std::cerr << "This is fae root: " << this->fae << std::endl;
-      //     for (std::set<size_t>::const_iterator j = this->fae.roots[root]->getFinalStates().begin(); j != this->fae.roots[root]->getFinalStates().end(); ++j) 
-             // {  std::cerr << "This is set of final states: " << *j << std::endl; 
-//           for (TA<label_type>::iterator i = this->fae.roots[root]->begin(*j), end = this->fae.roots[root]->end(*j, i); i != end ; ++i) {
-                //        std::cerr << "this is transation: " << *i << std::endl; 
 
-  //         }
-    //       }
-          //      std::cerr << "Add final state: " << newState << std::endl;
                 ta.addFinalState(newState);
 	
-               // std::cerr << "New TA " << ta << std::endl;
-               	
                 std::vector<size_t> lhs;
 		size_t lhsOffset = 0;
 		for (std::vector<const AbstractBox*>::const_iterator j = t.label()->getNode().begin(); j != t.label()->getNode().end(); ++j) {
-//	        std::cerr << "this is abstract box or label "  << t.label() << std::endl;
                 	if (!(*j)->isStructural())
 				continue;
 			StructuralBox* b = (StructuralBox*)(*j);
-        //               std::cerr << "this is structural box: " << *b << std::endl;
-	//	        std::cerr << "this is arity of j: " << (*j)->getArity() << std::endl;
-                //	std::cerr << "this is lhs offset: " << lhs[1] << std::endl;
-          //              std::cerr << "this is f(b): " << !f(b)  << std::endl;
-                        if (!f(b)) {
+                                if (!f(b)) {
 				// this box is not interesting
 				for (size_t k = 0; k < (*j)->getArity(); ++k, ++lhsOffset)
 					lhs.push_back(t.lhs()[lhsOffset]);
@@ -332,7 +312,7 @@ public:
 			//	        std::cerr << "this is lhs offset: " << t.lhs()[lhsOffset] << std::endl;
                                 	continue;
 				}
-                  //      std::cerr << "Update new left hand side";	                 	
+                               	
          		// update new left-hand side
 				lhs.push_back(this->fae.addData(ta, Data::createRef(this->fae.roots.size())));
 				// prepare new root
@@ -354,10 +334,8 @@ public:
 		TA<label_type>* tmp = this->fae.allocTA();
 		ta.unreachableFree(*tmp);
 		// exchange the original automaton with the new one
-               // std::cerr << "the final state:" << newState << std::endl;
-		this->fae.roots[root] = std::shared_ptr<TA<label_type>>(tmp);
-              //  std::cerr << "fae after: " << this->fae << std::endl;
-		this->fae.connectionGraph.invalidate(root);
+               this->fae.roots[root] = std::shared_ptr<TA<label_type>>(tmp);
+               this->fae.connectionGraph.invalidate(root);
 	}
 
 	// adds redundant root points to allow further manipulation
@@ -367,39 +345,17 @@ public:
 		assert(root < this->fae.roots.size());
 		assert(this->fae.roots[root]);
 
-// 		CL_DEBUG_AT(1, "isolating at root " << root << " : " << IsolateSetF(offsets) << std::endl << this->fae);
-/*
-                void writeTransitions(const TA<T>& aut) {
-                for (typename TA<T>::iterator i = aut.begin(); i != aut.end(); ++i) {
-                        std::ostringstream ss;
-                        ss << i->label();
-                        this->writeTransition(i->lhs(), ss.str(), i->rhs());
-                        this->endl();
-                }
-        }
-
-*/
-//               for (std::set<size_t>::const_iterator j = this->fae.roots[root]->getStates().begin(); j != this->fae.roots[root]->getStates().end(); ++j) 
-  //              for (TA<label_type>::iterator i = this->fae.roots[root]->begin(*j), end = this->fae.roots[root]->end(*j, i); i != end ; ++i) 
-
-
 	for (std::set<size_t>::const_iterator j = this->fae.roots[root]->getFinalStates().begin(); j != this->fae.roots[root]->getFinalStates().end(); ++j) {
 		for (TA<label_type>::iterator i = this->fae.roots[root]->begin(*j), end = this->fae.roots[root]->end(*j, i); i != end ; ++i) {
 //                        std::cerr << "transation: " << this->fae.roots[root]->getFinalStates() << std::endl;
 			FAE fae(this->fae);
 			Splitting splitting(fae);
 			std::set<const Box*> boxes;
-//                        std::cerr << "fae before isolateAtRoot: " << fae << std::endl;
-			splitting.isolateAtRoot(root, *i, IsolateSetF(offsets), boxes);
-//	        	std::cerr << "fae after isolateAtRoot " << fae << std::endl;
-			if (!boxes.empty()) {
-//	                        std::cerr << "before decomposition: " << std::endl << fae;
+                        splitting.isolateAtRoot(root, *i, IsolateSetF(offsets), boxes);
+                        if (!boxes.empty()) {
          			Unfolding(fae).unfoldBoxes(root, boxes);
-			//	std::cerr << "after decomposition: " << std::endl << fae;
 				splitting.isolateSet(dst, root, 0, offsets);
-  //                              std::cerr << "after splitting: " << std::endl << *dst[0];
 			} else {
-			 //     std::cerr << "Empty box";
                         	dst.push_back(new FAE(fae));
 			}
 		}
@@ -409,67 +365,14 @@ public:
 
 	void isolateOne(std::vector<FAE*>& dst, size_t target, size_t offset) const {
 
-//		CL_CDEBUG(3, "isolateOne: " << target << ':' << offset << std::endl << this->fae);
-//                std::cerr << "before splitting: " << std::endl << fae;
-
 		this->isolateSet(dst, target, 0, { offset });
-//                std::cerr << "after splitting: " << std::endl << fae;
-
-/*
-		assert(target < this->fae.roots.size());
-		assert(this->fae.roots[target]);
-
-		std::set<size_t> tmp;
-
-		this->enumerateSelectorsAtRoot(tmp, target);
-
-		if (tmp.count(offset)) {
-
-			this->isolateAtRoot(dst, target, IsolateOneF(offset));
-
-			return;
-
-		}
-
-		this->fae.updateConnectionGraph();
-
-		for (size_t i = 0; i < this->fae.roots.size(); ++i) {
-
-			tmp.clear();
-
-			for (auto& cutpoint : this->fae.connectionGraph.data[i].signature) {
-
-				if (cutpoint.root != target)
-					continue;
-
-				this->enumerateSelectorsAtLeaf(tmp, i, target);
-
-				if (tmp.count(offset)) {
-
-					this->isolateAtLeaf(dst, i, target, offset);
-
-					return;
-
-				}
-
-				break;
-
-			}
-
-		}
-
-		throw ProgramError("isolateOne(): selector lookup failed!");
-*/
 	}
 
 	void isolateSet(std::vector<FAE*>& dst, size_t target, int base, const std::vector<size_t>& offsets) const {
              
 		assert(target < this->fae.roots.size());
 		assert(this->fae.roots[target]);
-                
-//		std::cerr <<  "isolateSet: " << target << ", " << base << " + " << utils::wrap(offsets) << std::endl;
-
-		std::vector<size_t> offsD;
+                std::vector<size_t> offsD;
 		std::set<size_t> tmpS, offsU;
 
 		this->enumerateSelectorsAtRoot(tmpS, target);
@@ -481,10 +384,7 @@ public:
 				offsU.insert(base + *i);
 		}
 
-//		CL_CDEBUG(3, "offsD: " << utils::wrap(offsD));
-//		CL_CDEBUG(3, "offsU: " << utils::wrap(offsU));
-
-		if (offsU.empty()) {
+         	if (offsU.empty()) {
 			this->isolateAtRoot(dst, target, offsD);
 			return;
 		}
@@ -535,49 +435,7 @@ public:
 		f.release();
 
 	}
-/*
-	void restrictedSplit(Index<size_t>& index, size_t root, size_t state) {
-		TA<label_type> ta(*this->fae.backend);
-		this->fae.roots[root]->copyTransitions(ta);
-		ta.addFinalState(state);
-		TA<label_type> ta2(*this->fae.backend);
-		this->fae.roots[root]->copyTransitions(ta2);
-		index.set(state, this->fae.addData(ta2, Data::createRef(this->fae.roots.size())));
-		size_t base = this->fae.nextState();
-		bool changed = true;
-		while (changed) {
-			changed = false;
-			for (TA<label_type>::iterator i = ta2.begin(); i != ta2.end(); ++i) {
-				std::vector<size_t> lhs = i->lhs();
-				for (size_t j = 0; j < lhs.size(); ++j) {
-					std::pair<size_t, bool> p = index.find(lhs[j]);
-					if (p.second) {
-						lhs[j] = p.first;
-						ta2.addTransition(lhs, i->label(), index.get(i->rhs(), base));
-						lhs[j] = i->lhs()[j];
-					}
-				}
-			}
-		}
-		this->fae.incrementStateOffset(index.size());
-		const std::set<size_t>& s = this->fae.roots[root]->getFinalStates();
-		for (std::set<size_t>::const_iterator i = s.begin(); i != s.end(); ++i) {
-			std::pair<size_t, bool> p = index.find(*i);
-			if (p.second)
-				ta2.addFinalState(p.first);
-		}
-		// update FAE
-		TA<label_type>* tmp = this->fae.allocTA();
-		ta.unreachableFree(*tmp);
-		this->fae.appendRoot(tmp);
-		this->fae.rootMap.push_back(FA::RootSignature());
-		this->fae.updateRootMap(this->fae.roots.size() - 1);
-		tmp = this->fae.allocTA();
-		ta2.unreachableFree(*tmp);
-		this->fae.roots[root] = std::shared_ptr<TA<label_type>>(tmp);
-		this->fae.updateRootMap(root);
-	}
-*/
+
 public:
 
 	Splitting(FAE& fae) : fae(fae) {}

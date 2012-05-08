@@ -92,8 +92,10 @@ struct FuseNonZeroF {
 	}
 };
 
-inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan) {
+inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan,ExecutionManager& execMan, std::vector<FAE>& faeList) {
 //        CL_DEBUG_AT(1, "before normalization: " << std::endl << fae);
+          FAE inputFae = fae; 
+  //      std::cerr << ".......................before normalization and fold.............................. " << fae << std::endl;
 	std::set<size_t> tmp;
 
 	VirtualMachine vm(fae);
@@ -113,9 +115,10 @@ inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan) {
 
 //	vm.getNearbyReferences(abp.d_ref.root, tmp);
 
+//        std::cerr << ".......................before normalization.............................. " << fae << std::endl;
 	norm.scan(marked, order);
 //	norm.normalize(marked, order);
-
+//        std::cerr << "......................after normalization.............................. " << fae << std::endl;
 //	CL_CDEBUG(3, "after normalization: " << std::endl << fae);
 
 	tmp.clear();
@@ -125,7 +128,7 @@ inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan) {
 //	norm.scan(marked, order);
 
 	// folding
-
+        
 	bool matched = false;
 
 	// do not touch root 0
@@ -159,7 +162,7 @@ inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan) {
 				auto newBox = boxMan.getBox(*aBox);
 
 				CL_DEBUG_AT(1, "learned " << *(AbstractBox*)newBox << ":" << std::endl << *newBox);
-
+//std::cerr << "learned " << *(AbstractBox*)newBox << ":" << std::endl << *newBox;
 				for (auto& j : iter->second)
 					folding.discover(j, tmp);
 
@@ -175,16 +178,24 @@ inline bool normalizeAndFold(FAE& fae, BoxMan& boxMan) {
 
 	}
 
-//	CL_DEBUG_AT(1, "after folding: " << std::endl << fae);
+	CL_DEBUG_AT(1, "after folding: " << std::endl << fae);
         
 	vm.getNearbyReferences(abp.d_ref.root, tmp);
 
 	norm.scan(marked, order, tmp);
 	norm.normalize(marked, order);
 
-//	CL_DEBUG_AT(1, "after normalization: " << std::endl << fae);
-
-	return matched;
+        FAE outputFae = fae;
+	CL_DEBUG_AT(1, "after normalization: " << std::endl << fae);
+        //std::cerr << ".......................After normalization.............................. " << fae << std::endl;
+	if(matched){
+      //  std::cerr << "-----------------------------------Normanization and Fold....................................." << std::endl << outputFae << std::endl;
+         //CL_DEBUG_AT(1, "Available Boxes: "<< *(AbstractBox*)&box << ':' << std::endl << box);
+        //     std::cerr << "Available Boxes: "<< *(AbstractBox*)&box << ':' << std::endl << box;
+       
+            execMan.absFAEs.push_back(outputFae);
+       }
+        return matched;
 
 }
 
@@ -215,7 +226,7 @@ inline bool testInclusion(FAE& fae, TA<label_type>& fwdConf, UFAE& fwdConfWrappe
 }
 
 inline void abstract(FAE& fae, TA<label_type>& fwdConf, TA<label_type>::Backend& backend, BoxMan& boxMan) {
-//        CL_DEBUG_AT(1, "before abstraction: " << std::endl <<fae);
+   //     std::cerr << "before abstraction: " << fae << std::endl;
 	fae.unreachableFree();
 
 //	CL_CDEBUG(1, SSD_INLINE_COLOR(C_LIGHT_GREEN, "after normalization:" ) << std::endl << *fae);
@@ -249,24 +260,30 @@ inline void abstract(FAE& fae, TA<label_type>& fwdConf, TA<label_type>::Backend&
                }  
 	fae.unreachableFree();
 
-//	CL_DEBUG_AT(1, "after abstraction: " << std::endl << fae);
-
+//	std::cerr << "after abstraction: " << fae << std::endl;
 }
 
 // FI_fix
 void FI_abs::execute(ExecutionManager& execMan, const AbstractInstruction::StateType& state) {
-
+         SymState* s = state.second;
+         std::vector<FAE> faeList;
+         faeList.clear();
+       // std::cerr << "Micro" << *state.second->instr << std::endl;
 	std::shared_ptr<FAE> fae = std::shared_ptr<FAE>(new FAE(*state.second->fae));
-//      CL_DEBUG_AT(1, "before execution: " << std::endl << *fae);
-	normalizeAndFold(*fae, this->boxMan);
-
+        execMan.avaiBoxes.clear(); 
+	normalizeAndFold(*fae, this->boxMan, execMan, faeList);
+         
 	do {
-
-		abstract(*fae, this->fwdConf, this->taBackend, this->boxMan);
-
-	} while (normalizeAndFold(*fae, this->boxMan));
-
-	// test inclusion
+                abstract(*fae, this->fwdConf, this->taBackend, this->boxMan);
+                 execMan.absFAEs.push_back(*fae);
+               /* execMan.avaiBoxes.clear();
+                for (auto& box : this->boxMan.getBoxes()){
+                  std::ostringstream ss;
+                  ss << *(AbstractBox*)&box << ':' << std::endl << box;
+                  execMan.avaiBoxes.push_back(ss.str());
+                 }*/
+	} while (normalizeAndFold(*fae, this->boxMan,execMan, faeList));       
+   	// test inclusion
 	fae->unreachableFree();
 
 	if (testInclusion(*fae, this->fwdConf, this->fwdConfWrapper)) {
@@ -276,22 +293,25 @@ void FI_abs::execute(ExecutionManager& execMan, const AbstractInstruction::State
 		execMan.traceFinished(state.second);
 
 	} else {
-
-		execMan.enqueue(state.second, state.first, fae, this->next_);
+ 		execMan.enqueue(state.second, state.first, fae, this->next_);
 
 	}
-   //CL_DEBUG_AT(1, "after execution: " << std::endl << *fae);
+            execMan.avaiBoxes = {};
+            for (auto& box : boxMan.getBoxes()){
+            std::ostringstream ss;
+            ss << *(AbstractBox*)&box << ':' << std::endl << box;
+            execMan.avaiBoxes.push_back(ss.str());
+            }
 
-
-}
+ }
 
 // FI_fix
 void FI_fix::execute(ExecutionManager& execMan, const AbstractInstruction::StateType& state) {
-        
+      // std::cerr << "fix statement------------------------------------------" << *state.second->instr << std::endl; 
        // CL_DEBUG_AT(1, "fix statement ");
 	std::shared_ptr<FAE> fae = std::shared_ptr<FAE>(new FAE(*state.second->fae));
-
-	normalizeAndFold(*fae, this->boxMan);
+        std::vector<FAE> faeList1;
+	normalizeAndFold(*fae, this->boxMan,execMan,faeList1);
 
 	if (testInclusion(*fae, this->fwdConf, this->fwdConfWrapper)) {
 

@@ -410,7 +410,7 @@ public:
 
 				}
 
-				std::cerr << 'q' << t.rhs() << ": " << v << std::endl;
+//				std::cerr << 'q' << t.rhs() << ": " << v << std::endl;
 
 				ConnectionGraph::normalizeSignature(v);
 
